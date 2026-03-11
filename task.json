@@ -1,0 +1,83 @@
+{
+  "student_id": "230105",
+  "assignment": "Midsem Part B",
+  "paper": "Algorithms for Learning Kernels Based on Centered Alignment (JMLR 2012)",
+  "llm_interactions": [
+    {
+      "task_id": "task_1_1",
+      "question": "Q1 - Paper Understanding: Explain the step-by-step algorithm of ALIGN and ALIGNF from input to prediction.",
+      "prompt_sent": "Explain the ALIGN and ALIGNF algorithms from the paper 'Algorithms for Learning Kernels Based on Centered Alignment' step by step, covering: input kernels, centered alignment computation, weight learning, and final prediction.",
+      "llm_response": "ALIGN/ALIGNF Algorithm Steps:\n1. Input: m training points, p base kernels K1...Kp, label vector y\n2. Center each kernel: K_c = (I - 11^T/m) K (I - 11^T/m)\n3. Compute alignment: A(K, y) = <K_c, yy^T> / (||K_c|| * ||yy^T||)\n4. ALIGN: weight each kernel by its alignment score independently\n5. ALIGNF: solve QP to find optimal convex combination jointly\n6. Final kernel: K* = sum(mu_i * K_i)\n7. Train SVM on K* and predict",
+
+    },
+    {
+      "task_id": "task_1_2",
+      "question": "Q1 - Paper Understanding: What are the key assumptions made in this paper?",
+      "prompt_sent": "What are the 3 key assumptions in the paper 'Algorithms for Learning Kernels Based on Centered Alignment' (JMLR 2012)?",
+      "llm_response": "3 Key Assumptions:\n1. Convex Combination Assumption: Optimal kernel lies in convex hull of base kernels — mu_i >= 0, sum(mu_i) = 1\n2. Alignment = Generalization: High centered alignment between kernel and target implies good generalization (alignment is a valid proxy for SVM performance)\n3. Two-Stage Decoupling: Kernel learning and SVM training can be decoupled — learn weights first, then train SVM separately",
+
+
+    },
+    {
+      "task_id": "task_1_3",
+      "question": "Q1 - Paper Understanding: What is the baseline and how does ALIGNF improve over it?",
+      "prompt_sent": "In the Centered Alignment paper, what is the baseline method, what are its limitations, and how does ALIGNF address them?",
+
+    },
+    {
+      "task_id": "task_2_1",
+      "question": "Q2 - Implementation: Set up a toy dataset suitable for kernel learning experiments.",
+      "prompt_sent": "Create a toy dataset for testing ALIGN and ALIGNF kernel combination algorithms. Include multiple base kernels (RBF with different gammas, polynomial, linear).",
+      "llm_response": "Toy Dataset Setup:\n- 200 samples, 2 classes, 2D input (make_classification)\n- 80/20 train-test split\n- 5 Base Kernels:\n  1. RBF (gamma=0.1) — wide\n  2. RBF (gamma=1.0) — medium\n  3. RBF (gamma=10.0) — narrow\n  4. Polynomial (degree=2)\n  5. Linear\n- Kernel matrices computed on training set and normalized",
+
+    },
+    {
+      "task_id": "task_2_2",
+      "question": "Q2 - Implementation: Implement ALIGNF algorithm from scratch.",
+      "prompt_sent": "Implement the ALIGNF algorithm from 'Algorithms for Learning Kernels Based on Centered Alignment'. Use centered kernel alignment and solve the QP for optimal weights.",
+      "llm_response": "ALIGNF Implementation:\n1. center_kernel(K): applies centering matrix H = I - (1/m)11^T\n2. kernel_alignment(K1, K2): computes <K1_c, K2_c>_F / (||K1_c||_F * ||K2_c||_F)\n3. alignf(kernels, y): builds alignment matrix M and vector a, solves: min ||M*mu - a||^2 s.t. mu >= 0, sum(mu)=1 using cvxpy\n4. Returns optimal weights mu*\nTest Accuracy with ALIGNF weights: ~91% vs Uniform: ~84%",
+
+    },
+    {
+      "task_id": "task_2_3",
+      "question": "Q2 - Implementation: Visualize and compare results of ALIGN, ALIGNF, and Uniform combination.",
+      "prompt_sent": "Compare ALIGN, ALIGNF, and Uniform kernel combination on the toy dataset. Plot kernel weights, alignment scores, and SVM test accuracies.",
+      "llm_response": "Results Comparison:\n| Method   | Test Accuracy | Avg Alignment |\n|----------|--------------|---------------|\n| Uniform  | 84.0%        | 0.312         |\n| ALIGN    | 87.5%        | 0.381         |\n| ALIGNF   | 91.0%        | 0.445         |\nBest kernel: RBF(gamma=1.0) got highest weight in ALIGNF.\nPlot saved: results/task2_results.png",
+ 
+    },
+    {
+      "task_id": "task_3_1",
+      "question": "Q3 - Ablation Study: Remove centering and alignment components and measure impact.",
+      "prompt_sent": "Perform ablation study on ALIGNF: (1) remove kernel centering, (2) replace alignment objective with random weights. Measure accuracy drop for each.",
+      "llm_response": "Ablation Results:\n| Configuration              | Test Accuracy | Drop vs Full |\n|---------------------------|--------------|---------------|\n| Full ALIGNF               | 91.0%        | —             |\n| Without centering         | 79.5%        | -11.5%        |\n| Random weights (no align) | 76.0%        | -15.0%        |\n| Uniform baseline          | 84.0%        | -7.0%         |\nConclusion: Centering is critical — uncentered kernels include mean bias leading to poor discrimination. Alignment objective is the most important component.",
+
+    
+    },
+    {
+      "task_id": "task_3_2",
+      "question": "Q3 - Failure Mode: Identify and demonstrate a failure case for ALIGNF.",
+      "prompt_sent": "Design a dataset/scenario where ALIGNF fails or performs poorly. Explain why theoretically and show empirically.",
+      "llm_response": "Failure Mode — Highly Correlated Kernels:\nScenario: All 5 base kernels are RBF with very similar gamma values (0.9, 0.95, 1.0, 1.05, 1.1).\nResult: ALIGNF accuracy drops to ~85% (same as uniform) because:\n1. All kernels carry nearly identical information\n2. QP solution is ill-conditioned — many weight vectors give same objective value\n3. ALIGNF cannot exploit diversity — degenerates to uniform\nFix: Use diverse kernel families (RBF + Polynomial + Linear + Sigmoid)",
+
+
+    },
+    {
+      "task_id": "task_4_1",
+      "question": "Q4 - Report: Summarize the entire Part B work in a structured 4-page report.",
+      "prompt_sent": "Write a 4-page academic report summarizing: paper understanding, ALIGNF implementation results, ablation study findings, and failure mode analysis for the Centered Alignment paper.",
+      "llm_response": "Report Structure:\nPage 1: Introduction + Paper Summary (ALIGN/ALIGNF, centered alignment definition)\nPage 2: Implementation Details (toy dataset, kernel setup, ALIGNF code walkthrough)\nPage 3: Results (accuracy table, weight distribution plots, ablation table)\nPage 4: Failure Mode + Conclusion (correlated kernels failure, fix suggestion, takeaways)\nGenerated as report.pdf using ReportLab.",
+
+
+    },
+    {
+      "task_id": "task_4_2",
+      "question": "Q4 - README: Create a README.md for the partB/ repository folder.",
+      "prompt_sent": "Create a professional README.md for a GitHub repository folder containing kernel learning assignment (Part B). Include structure, setup instructions, task summary, and key results.",
+      "llm_response": "README.md created with:\n- Repository structure tree\n- Task summary table (Q1-Q4 with marks)\n- Core idea explanation (ALIGN vs ALIGNF)\n- Setup & installation instructions (pip + requirements.txt)\n- Step-by-step run instructions (notebook order)\n- Key results summary\n- Important notes (deadline, Part A confirmation, Google Form link)",
+
+
+    }
+  ],
+  "total_tasks": 10
+  
+}
